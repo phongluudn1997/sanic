@@ -28,8 +28,39 @@ class User(db.Model):
 @app.route("/users/<user_id>")
 async def get_user(request, user_id):
     user = await User.get_or_404(int(user_id))
-    return json({'name': user.nickname})
+    return json({'name': user.nickname, 'id': user.id})
+
+
+@app.route('/json', methods=['POST'])
+def post_json(request):
+    return json({"message": request.json})
+
+
+@app.route('/query_string', methods=['POST'])
+def query_string(request):
+    return json({
+        "args": request.args,
+        "query_args": request.query_args,
+        "raw_args": request.raw_args,
+        "url": request.url,
+        "query_string": request.query_string
+    })
+
+
+@app.route("/files", methods=['POST'])
+def another_function(request):
+    test_file = request.files.get('test')
+
+    file_parameters = {
+        'body': test_file.body,
+        'name': test_file.name,
+        'type': test_file.type,
+    }
+
+    return json({"received": True,
+                 "file_names": request.files.keys(),
+                 "test_file_parameters": file_parameters})
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=8000)
